@@ -14,8 +14,6 @@ class Subprocess:
         
 
         Example:
-            import task
-
             def print_res( status, stdout, stderr ) :
                 if status == 0:
                     print "OK:"
