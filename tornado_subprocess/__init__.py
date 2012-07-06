@@ -58,8 +58,8 @@ class Subprocess:
 
         self.ioloop = tornado.ioloop.IOLoop.instance()
         if self.timeout > 0:
-            self.expiration = self.ioloop.add_timeout( time.time() + timeout, self.cancel )
-        self.pipe = subprocess.Popen(**self.popen_args)
+            self.expiration = self.ioloop.add_timeout( time.time() + self.timeout, self.cancel )
+        self.pipe = subprocess.Popen(**self.args)
         self.streams = [ (self.pipe.stdout.fileno(), []), 
                          (self.pipe.stderr.fileno(), []) ]
         for fd, d in self.streams:
