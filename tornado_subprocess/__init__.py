@@ -1,6 +1,5 @@
 """
 Copyright (c) 2012, Vukasin Toroman <vukasin@toroman.name>
-All rights reserved.
 """
 
 import subprocess
