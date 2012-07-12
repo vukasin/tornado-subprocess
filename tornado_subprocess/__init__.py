@@ -90,11 +90,13 @@ class Subprocess:
             self.ioloop.add_callback(self.__do_callback)
         for fd, dest in  self.streams:
             while True:
-                data = os.read(fd, 4096)
-                if len(data) == 0:
-                    break
-                dest.extend([data])
-
+		try:
+			data = os.read(fd, 4096)
+			if len(data) == 0:
+			    break
+			dest.extend([data])
+		except:
+			break	
     def __do_callback(self):
         if not self.callback is None:
             cb = self.callback
