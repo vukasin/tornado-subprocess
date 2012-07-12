@@ -8,7 +8,7 @@ def read(fname):
 
 setup(
     name="tornado_subprocess",
-    version='0.1.3',
+    version='0.1.4',
     author='Vukasin Toroman',
     author_email='vukasin@toroman.name',
     url='https://github.com/vukasin/tornado-subprocess',
