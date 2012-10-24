@@ -75,7 +75,7 @@ class Subprocess:
         self.pipe.kill()
         cb = self.callback
         self.callback = None
-        cb( ( -1,  "".join(self.stdout), "".join(self.stderr) ))
+        #cb(  -1,  "".join(self.stdout), "".join(self.stderr) )
 
     def stat( self, *args ):
         '''Check process completion and consume pending I/O data'''
