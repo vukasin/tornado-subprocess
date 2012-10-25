@@ -73,9 +73,6 @@ class Subprocess:
 
         Sends SIGKILL to the child process and triggers the callback."""
         self.pipe.kill()
-        cb = self.callback
-        self.callback = None
-        #cb(  -1,  "".join(self.stdout), "".join(self.stderr) )
 
     def stat( self, *args ):
         '''Check process completion and consume pending I/O data'''
@@ -97,6 +94,7 @@ class Subprocess:
 			dest.extend([data])
 		except:
 			break	
+
     def __do_callback(self):
         if not self.callback is None:
             cb = self.callback
