@@ -149,6 +149,7 @@ if __name__ == "__main__":
     t1 = Subprocess( print_timeout, timeout=3, args=[ "sleep", "5" ] )
     t2 = Subprocess( print_ok, timeout=3, args=[ "sleep", "1" ] )
     t3 = Subprocess( print_ok, timeout=3, args=[ "sleepdsdasdas", "1" ] )
+    t4 = Subprocess( print_error, timeout=3, args=[ "cat", "/etc/sdfsdfsdfsdfsdfsdfsdf" ] )
     
     t1.start()
     t2.start()
@@ -157,6 +158,7 @@ if __name__ == "__main__":
         assert(false)
     except:
         print "OK"
-
+    t4.start()
+    
     ioloop.add_timeout(time.time() + 10, stop_test)
     ioloop.start()            
