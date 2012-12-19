@@ -6,7 +6,7 @@ A module which allows you to spawn subprocesses from a tornado web application i
 Example:
 --------
   
-     def print_res( status, stdout, stderr ) :
+     def print_res( status, stdout, stderr, has_timed_out ) :
          if status == 0:
              print "OK:"
              print stdout
