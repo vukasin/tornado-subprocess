@@ -33,9 +33,10 @@ class GenericSubprocess (object):
         self.ioloop = tornado.ioloop.IOLoop.instance()
         if self.timeout > 0:
             self.expiration = self.ioloop.add_timeout( time.time() + self.timeout, self.on_timeout )
+        self.args['close_fds'] = True
         self.pipe = subprocess.Popen(**self.args)
-            
-        self.streams = [ (self.pipe.stdout.fileno(), []), 
+
+        self.streams = [ (self.pipe.stdout.fileno(), []),
                              (self.pipe.stderr.fileno(), []) ]
         for fd, d in self.streams:
             flags = fcntl.fcntl(fd, fcntl.F_GETFL)| os.O_NDELAY
@@ -76,7 +77,7 @@ class GenericSubprocess (object):
                         break
                     dest.extend([data])
                 except:
-                    break    
+                    break
     @property
     def stdout(self):
         return self.get_output(0)
@@ -84,14 +85,14 @@ class GenericSubprocess (object):
     @property
     def stderr(self):
         return self.get_output(1)
-        
+
     @property
     def status(self):
         return self.pipe.returncode
 
     def get_output(self, index ):
-        return "".join(self.streams[index][1]) 
-    
+        return "".join(self.streams[index][1])
+
     def on_finish(self):
         raise NotImplemented()
 
@@ -102,7 +103,7 @@ class Subprocess (GenericSubprocess):
     Arguments:
         callback: method to be called after completion. This method should take 3 arguments: statuscode(int), stdout(str), stderr(str), has_timed_out(boolean)
         timeout: wall time allocated for the process to complete. After this expires Task.cancel is called. A negative timeout value means no limit is set
-        
+
     The task is not started until start is called. The process will then be spawned using subprocess.Popen(**popen_args). The stdout and stderr are always set to subprocess.PIPE.
     """
 
@@ -112,7 +113,7 @@ class Subprocess (GenericSubprocess):
         Arguments:
             callback: method to be called after completion. This method should take 3 arguments: statuscode(int), stdout(str), stderr(str), has_timed_out(boolean)
             timeout: wall time allocated for the process to complete. After this expires Task.cancel is called. A negative timeout value means no limit is set
-            
+
         The task is not started until start is called. The process will then be spawned using subprocess.Popen(**popen_args). The stdout and stderr are always set to subprocess.PIPE.
         """
         self.callback = callback
@@ -127,12 +128,12 @@ class Subprocess (GenericSubprocess):
 
 if __name__ == "__main__":
     ioloop = tornado.ioloop.IOLoop.instance()
-    
+
     def print_timeout( status, stdout, stderr, has_timed_out) :
         assert(status!=0)
         assert(has_timed_out)
         print "OK status:", repr(status), "stdout:", repr(stdout), "stderr:", repr(stderr), "timeout:", repr(has_timed_out)
-        
+
     def print_ok( status, stdout, stderr, has_timed_out) :
         assert(status==0)
         assert(not has_timed_out)
@@ -142,24 +143,24 @@ if __name__ == "__main__":
         assert(status!=0)
         assert(not has_timed_out)
         print "OK status:", repr(status), "stdout:", repr(stdout), "stderr:", repr(stderr), "timeout:", repr(has_timed_out)
-        
+
     def stop_test():
         ioloop.stop()
 
-    
+
     t1 = Subprocess( print_timeout, timeout=3, args=[ "sleep", "5" ] )
     t2 = Subprocess( print_ok, timeout=3, args=[ "sleep", "1" ] )
     t3 = Subprocess( print_ok, timeout=3, args=[ "sleepdsdasdas", "1" ] )
     t4 = Subprocess( print_error, timeout=3, args=[ "cat", "/etc/sdfsdfsdfsdfsdfsdfsdf" ] )
-    
+
     t1.start()
     t2.start()
     try:
-        t3.start()    
+        t3.start()
         assert(false)
     except:
         print "OK"
     t4.start()
-    
+
     ioloop.add_timeout(time.time() + 10, stop_test)
-    ioloop.start()            
+    ioloop.start()
