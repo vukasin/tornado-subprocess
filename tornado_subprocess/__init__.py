@@ -14,6 +14,7 @@ class GenericSubprocess (object):
     def __init__ ( self, timeout=-1, **popen_args ):
         popen_args["stdout"] = subprocess.PIPE
         popen_args["stderr"] = subprocess.PIPE
+        popen_args["close_fds"] = True
         self.ioloop = None
         self.expiration = None
         self.pipe = None
