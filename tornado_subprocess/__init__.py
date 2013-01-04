@@ -12,15 +12,16 @@ import os
 
 class GenericSubprocess (object):
     def __init__ ( self, timeout=-1, **popen_args ):
-        popen_args["stdout"] = subprocess.PIPE
-        popen_args["stderr"] = subprocess.PIPE
-        popen_args["close_fds"] = True
+        self.args = dict()
+        self.args["stdout"] = subprocess.PIPE
+        self.args["stderr"] = subprocess.PIPE
+        self.args["close_fds"] = True
+        self.args.update(popen_args)
         self.ioloop = None
         self.expiration = None
         self.pipe = None
         self.timeout = timeout
         self.streams = []
-        self.args = popen_args
         self.has_timed_out = False
 
     def start(self):
@@ -33,7 +34,6 @@ class GenericSubprocess (object):
         self.ioloop = tornado.ioloop.IOLoop.instance()
         if self.timeout > 0:
             self.expiration = self.ioloop.add_timeout( time.time() + self.timeout, self.on_timeout )
-        self.args['close_fds'] = True
         self.pipe = subprocess.Popen(**self.args)
 
         self.streams = [ (self.pipe.stdout.fileno(), []),
