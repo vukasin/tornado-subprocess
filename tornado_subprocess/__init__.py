@@ -91,7 +91,7 @@ class GenericSubprocess (object):
         return self.pipe.returncode
 
     def get_output(self, index ):
-        return "".join(self.streams[index][1])
+        return b"".join(self.streams[index][1])
 
     def on_finish(self):
         raise NotImplemented()
@@ -132,17 +132,17 @@ if __name__ == "__main__":
     def print_timeout( status, stdout, stderr, has_timed_out) :
         assert(status!=0)
         assert(has_timed_out)
-        print "OK status:", repr(status), "stdout:", repr(stdout), "stderr:", repr(stderr), "timeout:", repr(has_timed_out)
+        print("OK status:", repr(status), "stdout:", repr(stdout), "stderr:", repr(stderr), "timeout:", repr(has_timed_out))
 
     def print_ok( status, stdout, stderr, has_timed_out) :
         assert(status==0)
         assert(not has_timed_out)
-        print "OK status:", repr(status), "stdout:", repr(stdout), "stderr:", repr(stderr), "timeout:", repr(has_timed_out)
+        print("OK status:", repr(status), "stdout:", repr(stdout), "stderr:", repr(stderr), "timeout:", repr(has_timed_out))
 
     def print_error( status, stdout, stderr, has_timed_out):
         assert(status!=0)
         assert(not has_timed_out)
-        print "OK status:", repr(status), "stdout:", repr(stdout), "stderr:", repr(stderr), "timeout:", repr(has_timed_out)
+        print("OK status:", repr(status), "stdout:", repr(stdout), "stderr:", repr(stderr), "timeout:", repr(has_timed_out))
 
     def stop_test():
         ioloop.stop()
@@ -159,7 +159,7 @@ if __name__ == "__main__":
         t3.start()
         assert(false)
     except:
-        print "OK"
+        print("OK")
     t4.start()
 
     ioloop.add_timeout(time.time() + 10, stop_test)
