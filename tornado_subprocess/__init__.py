@@ -11,7 +11,8 @@ import os
 
 
 class GenericSubprocess (object):
-    def __init__ ( self, timeout=-1, **popen_args ):
+
+    def __init__(self, timeout=-1, **popen_args):
         self.args = dict()
         self.args["stdout"] = subprocess.PIPE
         self.args["stderr"] = subprocess.PIPE
@@ -28,28 +29,28 @@ class GenericSubprocess (object):
         """Spawn the task.
 
         Throws RuntimeError if the task was already started."""
-        if not self.pipe is None:
+        if self.pipe is not None:
             raise RuntimeError("Cannot start task twice")
 
         self.ioloop = tornado.ioloop.IOLoop.instance()
         if self.timeout > 0:
-            self.expiration = self.ioloop.add_timeout( time.time() + self.timeout, self.on_timeout )
+            self.expiration = self.ioloop.add_timeout(time.time() + self.timeout, self.on_timeout)
         self.pipe = subprocess.Popen(**self.args)
 
-        self.streams = [ (self.pipe.stdout.fileno(), []),
-                             (self.pipe.stderr.fileno(), []) ]
+        self.streams = [(self.pipe.stdout.fileno(), []),
+                        (self.pipe.stderr.fileno(), [])]
         for fd, d in self.streams:
-            flags = fcntl.fcntl(fd, fcntl.F_GETFL)| os.O_NDELAY
-            fcntl.fcntl( fd, fcntl.F_SETFL, flags)
-            self.ioloop.add_handler( fd,
-                                     self.stat,
-                                     self.ioloop.READ|self.ioloop.ERROR)
+            flags = fcntl.fcntl(fd, fcntl.F_GETFL) | os.O_NDELAY
+            fcntl.fcntl(fd, fcntl.F_SETFL, flags)
+            self.ioloop.add_handler(fd,
+                                    self.stat,
+                                    self.ioloop.READ | self.ioloop.ERROR)
 
     def on_timeout(self):
         self.has_timed_out = True
         self.cancel()
 
-    def cancel (self ) :
+    def cancel(self):
         """Cancel task execution
 
         Sends SIGKILL to the child process."""
@@ -58,18 +59,18 @@ class GenericSubprocess (object):
         except:
             pass
 
-    def stat( self, *args ):
+    def stat(self, *args):
         '''Check process completion and consume pending I/O data'''
         self.pipe.poll()
-        if not self.pipe.returncode is None:
+        if self.pipe.returncode is not None:
             '''cleanup handlers and timeouts'''
-            if not self.expiration is None:
+            if self.expiration is not None:
                 self.ioloop.remove_timeout(self.expiration)
-            for fd, dest in  self.streams:
+            for fd, dest in self.streams:
                 self.ioloop.remove_handler(fd)
             '''schedulle callback (first try to read all pending data)'''
             self.ioloop.add_callback(self.on_finish)
-        for fd, dest in  self.streams:
+        for fd, dest in self.streams:
             while True:
                 try:
                     data = os.read(fd, 4096)
@@ -78,6 +79,7 @@ class GenericSubprocess (object):
                     dest.extend([data])
                 except:
                     break
+
     @property
     def stdout(self):
         return self.get_output(0)
@@ -90,7 +92,7 @@ class GenericSubprocess (object):
     def status(self):
         return self.pipe.returncode
 
-    def get_output(self, index ):
+    def get_output(self, index):
         return b"".join(self.streams[index][1])
 
     def on_finish(self):
@@ -98,6 +100,7 @@ class GenericSubprocess (object):
 
 
 class Subprocess (GenericSubprocess):
+
     """Create new instance
 
     Arguments:
@@ -107,7 +110,7 @@ class Subprocess (GenericSubprocess):
     The task is not started until start is called. The process will then be spawned using subprocess.Popen(**popen_args). The stdout and stderr are always set to subprocess.PIPE.
     """
 
-    def __init__ ( self, callback, *args, **kwargs):
+    def __init__(self, callback, *args, **kwargs):
         """Create new instance
 
         Arguments:
@@ -129,29 +132,28 @@ class Subprocess (GenericSubprocess):
 if __name__ == "__main__":
     ioloop = tornado.ioloop.IOLoop.instance()
 
-    def print_timeout( status, stdout, stderr, has_timed_out) :
-        assert(status!=0)
+    def print_timeout(status, stdout, stderr, has_timed_out):
+        assert(status != 0)
         assert(has_timed_out)
         print("OK status:", repr(status), "stdout:", repr(stdout), "stderr:", repr(stderr), "timeout:", repr(has_timed_out))
 
-    def print_ok( status, stdout, stderr, has_timed_out) :
-        assert(status==0)
+    def print_ok(status, stdout, stderr, has_timed_out):
+        assert(status == 0)
         assert(not has_timed_out)
         print("OK status:", repr(status), "stdout:", repr(stdout), "stderr:", repr(stderr), "timeout:", repr(has_timed_out))
 
-    def print_error( status, stdout, stderr, has_timed_out):
-        assert(status!=0)
+    def print_error(status, stdout, stderr, has_timed_out):
+        assert(status != 0)
         assert(not has_timed_out)
         print("OK status:", repr(status), "stdout:", repr(stdout), "stderr:", repr(stderr), "timeout:", repr(has_timed_out))
 
     def stop_test():
         ioloop.stop()
 
-
-    t1 = Subprocess( print_timeout, timeout=3, args=[ "sleep", "5" ] )
-    t2 = Subprocess( print_ok, timeout=3, args=[ "sleep", "1" ] )
-    t3 = Subprocess( print_ok, timeout=3, args=[ "sleepdsdasdas", "1" ] )
-    t4 = Subprocess( print_error, timeout=3, args=[ "cat", "/etc/sdfsdfsdfsdfsdfsdfsdf" ] )
+    t1 = Subprocess(print_timeout, timeout=3, args=["sleep", "5"])
+    t2 = Subprocess(print_ok, timeout=3, args=["sleep", "1"])
+    t3 = Subprocess(print_ok, timeout=3, args=["sleepdsdasdas", "1"])
+    t4 = Subprocess(print_error, timeout=3, args=["cat", "/etc/sdfsdfsdfsdfsdfsdfsdf"])
 
     t1.start()
     t2.start()
